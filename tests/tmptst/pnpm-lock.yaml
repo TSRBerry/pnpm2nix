@@ -1,4 +1,8 @@
-lockfileVersion: '6.0'
+lockfileVersion: '6.1'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
 
 dependencies:
   '@0xproject/base-contract':
@@ -709,7 +713,8 @@ packages:
     dev: false
 
   /popper.js@1.14.3:
-    resolution: {integrity: sha1-FDj5jQRqz3tNeM1QK/QYrGTU8JU=}
+    resolution: {integrity: sha512-3lmujhsHXzb83+sI0PzfrE3O1XHZG8m8MXNMTupvA6LrM1/nnsiqYaacYc/RIente9VqnTDPztGEM8uvPAMGyg==}
+    deprecated: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
     dev: false
 
   /psl@1.2.0:
