@@ -1,0 +1,60 @@
+name: Update pnpm lockfiles
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: "22 3 20 * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pnpm-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Update lockfiles
+        run: |
+          find ./tests -type f -name "package.json" -execdir pnpm i --lockfile-only \;
+
+      - name: Check if files have been modified
+        id: mod_check
+        run: |
+          [[ $(git status -s | wc -l) -le 1 ]] \
+          && echo "is-dirty=false" >> "$GITHUB_OUTPUT" \
+          || echo "is-dirty=true" >> "$GITHUB_OUTPUT"
+
+      - uses: cachix/install-nix-action@v22
+        if: steps.mod_check.outputs.is-dirty == 'true'
+        with:
+          nix_path: nixpkgs=channel:nixos-23.05
+
+      - name: Run tests
+        if: steps.mod_check.outputs.is-dirty == 'true'
+        run: nix-build --no-out-link ./tests/default.nix --show-trace
+
+      - name: Configure git
+        if: steps.mod_check.outputs.is-dirty == 'true'
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Commit and push changes
+        if: steps.mod_check.outputs.is-dirty == 'true'
+        run: |
+          git add .
+          git commit -m "Update pnpm-lock.yaml files"
+          git push
