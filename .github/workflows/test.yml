@@ -6,6 +6,10 @@ on:
     branches:
       - master
 
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.event_name == 'push' && 'tests-master' || format('tests-pr-{0}', github.event.number) }}
+
 jobs:
   tests:
     runs-on: ubuntu-latest
